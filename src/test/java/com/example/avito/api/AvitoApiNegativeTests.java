@@ -18,6 +18,7 @@ import org.junit.jupiter.api.*;
 import java.util.Locale;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.Matchers.hasSize;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -144,5 +145,18 @@ public class AvitoApiNegativeTests {
                 .statusCode(400); // Ожидаем код 400 Bad Request или 500 Internal Server Error (зависит от API)
     }
 
+    @Test
+    @DisplayName("3.3. Получение объявлений несуществующего продавца")
+    void testGetItemsForNonExistentSeller() {
+        int nonExistentSellerId = faker.number().numberBetween(1000000, Integer.MAX_VALUE); // Генерируем заведомо несуществующий sellerId
 
+        given(requestSpec)
+                .pathParam("sellerId", nonExistentSellerId)
+                .when()
+                .get(AvitoApiConfig.getSellerItemEndpoint())
+                .then()
+                .statusCode(200) // Ожидаем 200 OK (или 404 Not Found, или другой код, в зависимости от API)
+                .body("$", hasSize(0)); // Проверяем, что размер массива равен 0    }
+
+    }
 }
